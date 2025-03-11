@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>Itinerary</title>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Navigation Bar -->
+        <div class="container-start p-3 d-flex border-bottom justify-content-between align-items-center">
+            <a href="/">
+                <img src="/images/logo.png" alt="Logo" class="logo">
+            </a>
+
+            <!-- Menu Toggle Button (☰) for small screens -->
+            <button class="menu-toggle d-lg-none">☰</button>
+
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <button class="btn me-2 text-white" onclick="redirectToGuides()">Guides</button>
+                <button class="btn me-2 text-white" onclick="redirectToHotels()">Hotels</button>
+                <button class="btn me-2 text-white" onclick="redirectToPromotions()">Promotions</button>
+                <button class="btn me-2 text-white" onclick="redirectToManage()">Manage-Trips</button>
+                <button class="btn me-2 text-white" onclick="redirectToPromotions()"><a href="/logout" style="text-decoration: none; color: white;">Logout (<%= user.username %>)</a></button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="trip-buttons p-4 d-flex flex-wrap justify-content-center gap-5">
+                    <button class="btn me-2 text-white">Trip 1</button>
+                    <button class="btn me-2 text-white">Trip 2</button>
+                    <button class="btn me-2 text-white">Trip 3</button>
+                    <button class="btn me-2 text-white">Trip 4</button>
+                    <button class="btn me-2 text-white">Trip 5</button>
+            </div>
+            <div class="trips">
+                <div class="trip-details p-4 d-flex">
+                    <div class="trip-info d-flex flex-column gap-3 p-5">
+                        <div class="trip-members d-flex gap-3 p-3">
+                            <% members.forEach(member => { %> 
+                                <div class="member-name p-2 text-white"><h5><%= member.member_name %></h5></div>   
+                            <%}) %>
+                            <% if (members.length > 5) { %>
+                                <h5>+ <%= members.length - 5 %></h5>
+                            <% } %>
+                        </div>
+                        <div class="trip-description p-auto mt-5">
+                            <p class="p-3 fs-5"><b>Description: </b><%= trip.description %></p>
+                        </div>
+                    </div>
+                    <div class="trip-image p-3"> 
+                        <img src= "<%= trip.image_path %>" alt="<%= trip.name %>">
+                    </div>
+                </div>
+ 
+                <div class="flight-details p-4 d-flex justify-content-between gap-4">
+                    <div class="flight-info d-flex flex-column gap-3 p-4">
+                        <!-- Flight Section -->
+                        <% if (flight) { %>
+                        <div class="flight d-flex flex-column p-0">
+                            <div class="flight-top d-flex p-2">
+                                <h2 class="fs-4">Flight</h2>
+                            </div>
+                            <div class="p-2">
+                            <p><%= flight.departure %> -> <%= flight.arrival %></p>
+                            <p>Departure: <%= flight.departure_time %></p>
+                            <p>Arrival: <%= flight.arrival_time %></p>
+                            </div>
+                        </div>
+                        <% } else { %>
+                                <p class="text-center">No Flight Details Available For This Trip</p>
+                        <% } %>
+                
+                        <% if (center) { %>
+                        <!-- City Center Section -->
+                        <div class="city-center d-flex flex-column p-0">
+                            <div class="city-top d-flex p-2">
+                                <h2 class="fs-4">Travelling To City Center</h2>
+                            </div>
+                            <div class="p-2">
+                            <p><%= center.departure %> -> <%= center.arrival %></p>
+                            <p>Transport: <%= center.transport %></p>
+                            <p>Arrival Time: <%= center.arrival_time%></p>
+                            </div>
+                            <% } else { %>
+                                <p class="text-center">No Details Available For This Trip</p>
+                             <% } %>
+
+                            <!-- Voting Section -->
+                            <div class="vote-section mt-3 d-flex align-items-center gap-3">
+                                <button class="vote-btn city-vote" data-trip-id="<%= trip.trip_id %>" data-vote="up">
+                                    👍 <span class="upvote-count"><%= center.upvotes %></span>
+                                </button>
+                                <button class="vote-btn city-vote" data-trip-id="<%= trip.trip_id %>" data-vote="down">
+                                    👎 <span class="downvote-count"><%= center.downvotes %></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Section: OpenStreetMap -->
+                    <div class="trip-map p-3">
+                        <div id="map"></div>
+                    </div>
+                </div>
+
+                <div class="food-poll p-4 d-flex justify-content-between gap-4">
+                    <!-- Left Section: Restaurants -->
+                    <div class="restaurants d-flex flex-column gap-3 p-3">
+                        <div class="top-bar p-1">
+                            <h4>Food Poll</h4>
+                        </div>
+                        
+                        <!-- Restaurants -->
+                        <% if (restaurants.length > 0) { %>
+                            <% restaurants.forEach(restaurant => { %>
+                                <div class="restaurant d-flex align-items-center p-3">
+                                    <div class="restaurant-text me-3">
+                                        <p><b><%= restaurant.name %></b></p>
+                                        <p>Reviews: <%= restaurant.rating %></p>
+                                        <p>Price: <%= restaurant.price %></p>
+                                    </div>
+                                    <div class="restaurant-pic">
+                                        <img src="<%= restaurant.image_path %>" alt="<%= restaurant.name %>">
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p class="text-center">No restaurants available for this trip.</p>
+                        <% } %>
+
+                        <!-- Poll Bar -->
+                        <div class="poll-section p-3 text-center">
+                            <h5>Which restaurant do you prefer?</h5>
+                            <div class="poll-bar">
+                                <button class="poll-btn left vote-btn restaurant-vote" data-trip-id="<%= trip.trip_id %>" data-restaurant-id="<%= restaurants[0].restaurant_id %>" data-vote="up">
+                                    <%= restaurants[0].name %>
+                                </button>
+                                <div class="bar-container">
+                                    <div class="bar-fill" id="barFill"></div>
+                                    <span id="voteText"><%= Math.round((restaurants[0].votes / (restaurants[0].votes + restaurants[1].votes)) * 100) %>%</span>
+                                </div>
+                                <button class="poll-btn right vote-btn restaurant-vote" data-trip-id="<%= trip.trip_id %>" data-restaurant-id="<%= restaurants[1].restaurant_id %>" data-vote="up">
+                                    <%= restaurants[1].name %>
+                                </button>
+                            </div>
+                        </div>                                              
+                    </div>
+                
+                    <!-- Right Section: Map -->
+                    <div class="restaurant-map p-3">
+                        <iframe src="https://www.google.com/maps/d/u/1/embed?mid=1gRDmqn1FduCzvdM1_XGSVnHW_abRUz0&ehbc=2E312F&noprof=1" width="640" height="480"></iframe>
+                    </div>
+                </div>
+
+                <div class="shopping-section">
+                    <% if (shopping.length > 0) { %>
+                        <% shopping.forEach(shop => { %>
+                            <div class="shopping-card">
+                                <div class="shopping-header">
+                                    <h5>Shopping</h5>
+                                    <span class="more-options">...</span>
+                                </div>
+                                <div class="shopping-body">
+                                    <div class="shopping-info">
+                                        <p><b><%= shop.name %></b></p>
+                                        <p>Reviews: <%= shop.reviews %> ⭐⭐⭐⭐⭐</p>
+                                        <p><%= shop.opening_time %> to <%= shop.closing_time %></p>
+                                    </div>
+                                    <div class="shopping-img">
+                                        <img src="<%= shop.image_path %>" alt="<%= shop.name %>">
+                                    </div>
+                                </div>
+                                <div class="shopping-footer">
+                                    <div class="votes">
+                                        <button class="vote-btn shopping-vote" data-trip-id="<%= trip.trip_id %>" data-shop-id="<%= shop.shop_id %>" data-vote="up">
+                                            👍 <span class="upvote-count"><%= shop.upvotes %></span>
+                                        </button>
+                                        <button class="vote-btn shopping-vote" data-trip-id="<%= trip.trip_id %>" data-shop-id="<%= shop.shop_id %>" data-vote="down">
+                                            👎 <span class="downvote-count"><%= shop.downvotes %></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-center">No shopping places available for this trip.</p>
+                    <% } %>
+                </div>                
+                
+                <div class="hotel-section d-flex gap-0">
+                    <!-- Left Section: Hotel Details -->
+                    <% if (hotels.length > 0) { %>
+                        <% hotels.forEach(hotel => { %>
+                            <div class="hotel-card p-0">
+                                <div class="hotel-header d-flex justify-content-between">
+                                    <h5>Getting to Hotel</h5>
+                                    <span class="more-options">...</span>
+                                </div>
+                                <div class="hotel-info">
+                                    <p><b><%= hotel.hotel_name %></b></p>
+                                    <p>Location: <%= hotel.hotel_location%></p>
+                                    <p>Check-in: <%= hotel.check_in %></p>
+                                    <p>Transport: <%= hotel.transport_details %></p>
+                                    <p><b>Price:</b> <%= hotel.price %></p>
+                                </div>
+                                <div class="hotel-footer d-flex justify-content-between align-items-center">
+                                    <div class="votes">
+                                        <button class="vote-btn hotel-vote" data-trip-id="<%= trip.trip_id %>" data-hotel-id="<%= hotel.hotel_id %>" data-vote="up">
+                                            👍 <span class="upvote-count"><%= hotel.upvotes %></span>
+                                        </button>
+                                        <button class="vote-btn hotel-vote" data-trip-id="<%= trip.trip_id %>" data-hotel-id="<%= hotel.hotel_id %>" data-vote="down">
+                                            👎 <span class="downvote-count"><%= hotel.downvotes %></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                    <!-- Center Section: Map -->
+                    <div class="hotel-map">
+                        <iframe
+                            width="300"
+                            height="300"
+                            style="border:0; border-radius: 10px;"
+                            loading="lazy"
+                            allowfullscreen
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.758311782344!2d139.76860761525755!3d35.681236580194315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188bfba7638577%3A0xbfedaa2532e2d2c4!2sTokyo%20Station!5e0!3m2!1sen!2sjp!4v1709112222222!5m2!1sen!2sjp">
+                        </iframe>
+                    </div>
+                
+                    <!-- Right Section: Hotel Image -->
+                    <div class="hotel-image">
+                        <img src="<%= hotel.image_path %>" alt="Hotel Metropolitan Tokyo">
+                    </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-center">No hotels available for this trip.</p>
+                    <% } %>                    
+                </div>  
+                
+                <div class="confirm-trip p-5 d-flex justify-content-center align-items-center">
+                    <button id="confirmTripBtn" class="btn btn-success"
+                        data-trip-id="<%= trip.trip_id %>"
+                        data-title="<%= trip.trip_name %>"
+                        data-destination="<%= trip.trip_name %>"
+                        data-start-date="<%= trip.trip_start_date %>"
+                        data-end-date="<%= trip.trip_end_date %>"
+                        data-image-path="<%= trip.image_path %>"
+                        data-user-id="<%= user ? user.id : '' %>"
+                    >
+                        Confirm Trip
+                    </button>
+                </div>                                           
+
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer p-3 border-top text-center text-white">
+        <p>&copy; 2025 Travel Itinerary Planner from Team 86. All Rights Reserved</p>
+        <div class="d-flex justify-content-center">
+            <a href="/" class="me-3 text-white"><i class="bi bi-facebook"></i></a>
+            <a href="/" class="me-3 text-white"><i class="bi bi-instagram"></i></a>
+            <a href="/" class="me-3 text-white"><i class="bi bi-twitter-x"></i></a>
+        </div>
+    </footer>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuToggle = document.querySelector(".menu-toggle");
+            const navButtons = document.querySelector(".nav-buttons");
+
+            menuToggle.addEventListener("click", function () {
+                navButtons.classList.toggle("active");
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.innerWidth >= 420) {
+                    navButtons.classList.remove("active");
+                }
+            });
+        });
+
+        function redirectToHome() 
+        {
+        window.location.href = "/"
+        }
+
+        function redirectToGuides() 
+        {
+        window.location.href = "/travel-guide"
+        }
+
+        function redirectToManage()
+        {
+        window.location.href = "/manage-trips"
+        }
+
+        function redirectToHotels()
+        {
+        window.location.href = "/hotels"
+        }
+
+        function redirectToPromotions()
+        {
+        window.location.href = "/deals"
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+        // Initialize the map
+        var map = L.map('map').setView([10, 120], 3); // Centered roughly between Singapore & Tokyo
+
+        // Add OpenStreetMap Tile Layer (No API Key Needed)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add markers for Singapore and Narita
+        var singapore = L.marker([1.3644, 103.9915]).addTo(map) // Changi Airport
+            .bindPopup("Singapore Changi Airport");
+        
+        var narita = L.marker([35.7719, 140.3929]).addTo(map) // Narita Airport
+            .bindPopup("Narita International Airport");
+
+        // Draw a line between Singapore & Narita
+        var flightPath = L.polyline([
+            [1.3644, 103.9915], // Singapore
+            [35.7719, 140.3929]  // Narita
+        ], {color: 'blue'}).addTo(map);
+    });
+    </script>
+
+    <!-- CSS Styling -->
+    <style>
+        html, body{
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .wrapper{
+            display: flex;
+            flex-direction: column;
+            min-height: 760px;
+        }
+
+        .logo{
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .container-start{
+            background-color: pink;
+            box-shadow: 0px 10px 5px rgba(0, 0, 0, 0.1)
+        }
+
+        .btn{
+            background-color: palevioletred;
+        }
+
+        .btn:hover{
+            background-color: rgb(228, 36, 100);
+            transition: 0.7s;
+        }
+
+        body{
+            background-color: white;
+        }
+
+        .main-content{
+            flex: 1;
+            background-color: rgb(255, 255, 255);
+        }
+
+        .trips{
+            background-color: rgb(255, 255, 255);
+        }
+
+        .trip-details{
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .trip-members{
+            background-color:  rgb(238, 238, 239);
+            width: 100%;
+            justify-content: center;
+            border-radius: 15px;
+        }
+
+        .trip-description{
+            background-color:  rgb(238, 238, 239);
+            width: 100%;
+            border-radius: 15px;
+        }
+
+        .trip-image{
+            background-color:  rgb(238, 238, 239);
+            width: 42%;
+            border-radius: 15px;
+        }
+
+        .trip-image img{
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+        }
+
+        .trip-info {
+            display: flex;
+            flex-direction: column; 
+            width: 50%;
+        }
+
+        .member-name{
+            background-color: rgb(0, 0, 0);
+            border-radius: 50px;
+        }
+
+        .flight-details {
+        background-color: rgb(255, 255, 255);
+        display: flex;
+            align-items: center; 
+            justify-content: space-around; 
+            flex-wrap: wrap; 
+            gap: 20px;
+            height: 100%;
+        }
+
+        .flight-info {
+            background-color: rgb(255, 255, 255);
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 20px; 
+            width: 50%; 
+        }
+
+        .flight, .city-center {
+            background-color: rgb(238, 238, 239);
+            width: 100%; 
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center; 
+        }
+
+        .flight-top, .city-top {
+            background-color: pink;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .flight-top h2, .city-top h2 {
+            margin: 0; 
+            text-align: center;
+        }
+
+        .flight p, .city-center p {
+            margin: 5px 0; 
+        }
+
+
+        .flight p:first-of-type,.city-center p:first-of-type{
+            margin-bottom: 15px; 
+        }
+
+        .footer{
+            background-color: pink;
+        }
+
+        .ft-container p{
+            color: white;
+        }
+
+        .trip-map {
+            width: 40%; 
+            height: 300px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .vote-btn {
+            font-size: 18px;
+            padding: 5px 10px;
+        }
+
+        .top-bar{
+            background-color: pink;
+            text-align: center;
+            border-radius: 15px;
+        }
+
+        .food-poll {
+            display: flex;
+            justify-content: space-between; 
+            align-items: flex-start; 
+            flex-wrap: wrap; 
+            gap: 20px;
+        }
+
+        .restaurants {
+            width: 55%; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: rgb(238, 238, 239);
+            border-radius: 15px;
+        }
+
+        .restaurant {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            background-color: rgb(238, 238, 239);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .restaurant-text {
+            flex: 1; 
+        }
+
+        .restaurant-pic {
+            width: 150px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .restaurant-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .restaurant-map {
+            width: 40%; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .restaurant-map iframe {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+        }
+
+        /*poll*/
+        .poll-section {
+            background-color: rgb(250, 220, 220);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .poll-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .poll-btn {
+            padding: 8px 12px;
+            border: none;
+            background-color: palevioletred;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .poll-btn:hover {
+            background-color: rgb(228, 36, 100);
+        }
+
+        .bar-container {
+            position: relative;
+            width: 200px;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bar-fill {
+            position: absolute;
+            left: 0;
+            width: 50%; 
+            height: 100%;
+            background-color: rgb(255, 87, 87);
+            transition: width 0.5s ease-in-out;
+        }
+
+        #voteText {
+            position: relative;
+            font-weight: bold;
+            z-index: 2;
+            color: white;
+        }
+
+        /* Shopping */
+        .shopping-section {
+            display: flex;
+            justify-content: space-between; 
+            flex-wrap: wrap; 
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .shopping-card {
+            background-color: #f8d7da; 
+            border-radius: 12px;
+            width: 280px; 
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .shopping-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .more-options {
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .shopping-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .shopping-info {
+            font-size: 14px;
+            flex: 1;
+            color: #555;
+        }
+
+        .shopping-img img {
+            width: 80px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-left: 10px;
+        }
+
+        .shopping-footer {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .votes {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            transition: 0.3s;
+        }
+
+        .vote-btn:hover {
+            background-color: rgb(248, 145, 162);
+            transition: ease-out;
+        }
+
+        .vote-score {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        /* Hotel */
+        .hotel-section {
+            display: flex;
+            justify-content: space-evenly; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .hotel-card {
+            background-color: #f5f5f5; 
+            border-radius: 12px;
+            width: 400px; 
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center; 
+            position: relative;
+        }
+
+        .hotel-header {
+            background-color: #f8cdd2; 
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .hotel-info {
+            font-size: 16px;
+            color: #333;
+            margin-top: 10px;
+            padding: 15px;
+        }
+
+        .hotel-card::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            filter: blur(5px);
+        }
+
+        .hotel-info p {
+            margin: 5px 0;
+        }
+
+        .more-options {
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .votes {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            transition: 0.3s;
+        }
+
+        .vote-btn.upvote {
+            color: green;
+        }
+
+        .vote-btn.downvote {
+            color: red;
+        }
+
+        .vote-score {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .hotel-map iframe {
+            width: 400px;
+            height: 250px;
+            border-radius: 10px;
+        }
+
+        .hotel-image img {
+            width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 420px) {
+            .nav-buttons {
+                visibility: hidden;
+                opacity: 0;
+                position: absolute;
+                top: 110px;
+                right: 10px;
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            }
+
+            .nav-buttons.active {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            .menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+            }
+        }
+
+        @media (min-width: 421px) and (max-width: 603px) {
+            .nav-buttons {
+                visibility: visible;
+                opacity: 1;
+                position: static;
+                background: none;
+                box-shadow: none;
+                flex-direction: row;
+            }
+
+            .menu-toggle {
+                display: none;
+            }
+        }
+
+        @media (min-width: 604px) {
+            .nav-buttons {
+                visibility: visible;
+                opacity: 1;
+                position: static;
+                background: none;
+                box-shadow: none;
+                flex-direction: row;
+            }
+
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+<script src="/js/itinerary.js"></script>
+<script src="/js/manage-trips.js"></script>
+</body>
+</html>

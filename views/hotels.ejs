@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <title>Hotels</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Header Section -->
+        <div class="container-start p-3 d-flex border-bottom justify-content-between align-items-center">
+            <a href="/">
+                <img src="/images/logo.png" alt="Logo" class="logo">
+            </a>
+            <div>
+                <button class="btn me-2 text-white">Guides</button>
+                <button class="btn me-2 text-white">Hotels</button>
+                <button class="btn text-white">Promotions</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content bg-white text-center p-3">
+            <!-- Search Bar -->
+            <div class="search-container mb-4">
+                <input type="text" id="searchBar" class="search-bar" placeholder="Search for a City or Country">
+            </div>
+
+            <!-- Main Map Section -->
+            <h4 class="text-center">Map Overview</h4>
+            <div id="map"></div>
+
+            <!-- Hotel Viewer Map -->
+            <div class="hotel-map-section mt-4">
+                <h4 class="text-center">Hotels Near Your Destination</h4>
+                <div id="hotel-map"></div>
+            </div>
+
+            <!-- Hotel Listings Section -->
+            <div id="hotel-listings" class="mt-4">
+                <h4 class="text-center">Hotel Pricing Estimates</h4>
+                <!-- Container for the hotel cards -->
+                <div class="hotel-card-container d-flex justify-content-center flex-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer p-3 border-top text-center">
+        <div class="ft-container">
+            <p>&copy; 2025 Travel Itinerary Planner from Team 86. All Rights Reserved</p>
+            <div class="d-flex justify-content-center">
+                <a href="/" class="me-3 text-white"><i class="bi bi-facebook"></i></a>
+                <a href="/" class="me-3 text-white"><i class="bi bi-instagram"></i></a>
+                <a href="/" class="me-3 text-white"><i class="bi bi-twitter-x\"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Google Maps Script -->
+    <script>
+        let map, hotelMap, service;
+        let selectedLocation = { lat: 1.2906, lng: 103.8465 }; // Default: Clarke Quay, Singapore
+
+        function initMap() {
+            // Main Map - Satellite View with Labels
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 17,
+                center: selectedLocation,
+                mapTypeId: 'hybrid'
+            });
+
+            new google.maps.Marker({
+                position: selectedLocation,
+                map: map,
+                title: "Clarke Quay, Singapore"
+            });
+
+            service = new google.maps.places.PlacesService(map);
+
+            // Listen for Enter key to trigger search
+            document.getElementById("searchBar").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    searchLocation(this.value, map);
+                }
+            });
+
+            // Hotel Viewer Map
+            hotelMap = new google.maps.Map(document.getElementById("hotel-map"), {
+                zoom: 15,
+                center: selectedLocation,
+                mapTypeId: 'hybrid'
+            });
+
+            fetchHotels();
+        }
+
+        function searchLocation(location, map) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: location }, function(results, status) {
+                if (status === "OK") {
+                    selectedLocation = results[0].geometry.location;
+                    map.setCenter(selectedLocation);
+                    hotelMap.setCenter(selectedLocation);
+                    new google.maps.Marker({
+                        map: map,
+                        position: selectedLocation
+                    });
+                    fetchHotels();
+                } else {
+                    alert("Location not found: " + status);
+                }
+            });
+        }
+
+        function fetchHotels() {
+            const request = {
+                location: selectedLocation,
+                radius: 1000,
+                type: "lodging"
+            };
+
+            service.nearbySearch(request, function(results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    displayHotelsOnMap(results);
+                    displayHotelsAsCards(results);
+                }
+            });
+        }
+
+        function displayHotelsOnMap(hotels) {
+            hotelMap.setCenter(selectedLocation);
+            hotelMap.setZoom(15);
+
+            hotels.forEach(hotel => {
+                new google.maps.Marker({
+                    position: hotel.geometry.location,
+                    map: hotelMap,
+                    title: hotel.name
+                });
+            });
+        }
+
+        // Updated to show up to 10 hotels & standardized images
+        function displayHotelsAsCards(hotels) {
+            const hotelList = document.querySelector(".hotel-card-container");
+            hotelList.innerHTML = "";
+
+            // Show 12 hotels for more variety
+            hotels.slice(0, 10).forEach((hotel) => {
+                let hotelCard = `
+                    <div class="hotel-card border rounded p-4 m-3 text-center">
+                        <h5 class="fw-bold">${hotel.name}</h5>
+                        <img
+                            src="${hotel.photos ? hotel.photos[0].getUrl() : '/images/no-image.png'}"
+                            class="img-fluid rounded"
+                            alt="Hotel Image"
+                        >
+                        <p class="mt-2">Rating: ${hotel.rating ? hotel.rating : "N/A"} ⭐</p>
+                        <p class="fw-bold">Estimated Price: SGD ${Math.floor(Math.random() * 250) + 50} per night</p>
+                        <div>
+                            <button style="background: none; border: none; cursor: pointer;">
+                                <i class="bi bi-heart" style="color: red; font-size: 1.3rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                hotelList.innerHTML += hotelCard;
+            });
+        }
+    </script>
+
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCw6cScfzxTmRJPD5PX_J3TKzUypYw_JXU&libraries=places&callback=initMap">
+    </script>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Styles -->
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 760px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .container-start {
+            background-color: pink;
+        }
+
+        .btn {
+            background-color: palevioletred;
+        }
+
+        .btn:hover {
+            background-color: rgb(228, 36, 100);
+            transition: 0.7s;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        .footer {
+            background-color: pink;
+        }
+
+        .ft-container p {
+            color: white;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar {
+            width: 60%;
+            padding: 15px;
+            border: 2px solid gray;
+            border-radius: 15px;
+            font-size: 20px;
+            text-align: center;
+            background-color: white;
+        }
+
+        .hotel-card-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        /* Standard card size + standard image size to align images */
+        .hotel-card {
+            width: 300px;
+            height: 480px; /* Fixed height so images line up */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Fix image height so they align horizontally */
+        .hotel-card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        #map, #hotel-map {
+            width: 80%;
+            height: 500px;
+            max-width: 1000px;
+            margin: 20px auto;
+            border-radius: 15px;
+            border: 2px solid #ddd;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</body>
+</html>

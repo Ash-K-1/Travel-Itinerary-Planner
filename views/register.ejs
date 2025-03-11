@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+        }
+
+        input:focus {
+            border-color: #ff0066;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        /* Set background image inside wrapper */
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; 
+            background-size: 1920px 1080px;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+            transition: background-image 1s ease-in-out;
+        }
+
+        .logo{
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .container-start{
+            background-color: pink;
+        }
+
+        .btn{
+            background-color: palevioletred;
+        }
+
+        .btn:hover{
+            background-color: rgb(228, 36, 100);
+            transition: 0.7s;
+        }
+
+        body{
+            background: white;
+        }
+
+        .main-content{
+            flex: 1;
+        }
+
+        .footer{
+            background-color: pink;
+        }
+
+        .ft-container p{
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="wrapper">
+        <div class="container-start p-3 d-flex border-bottom justify-content-between align-items-center">
+            <a href="/">
+                <img src="/images/logo.png" alt="Logo" class="logo">
+            </a>
+
+            <!-- Menu Toggle Button (☰) for small screens -->
+            <button class="menu-toggle d-lg-none">☰</button>
+
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <button class="btn me-2 text-white" onclick="window.location.href='/travel-guide'">Guides</button>
+                <button class="btn me-2 text-white" onclick="window.location.href='/hotels'">Hotels</button>
+                <button class="btn me-2 text-white" onclick="window.location.href='/deals'">Promotions</button>
+                <button class="btn me-2 text-white" onclick="window.location.href='/contact'">Contact Us</button>
+                <a href="<%= user ? '/logout' : '/login' %>" class="btn me-2 text-white">
+                    <%= user ? `Logout (${user.username})` : "Log In / Sign Up" %>
+                </a>
+            </div>
+        </div>
+
+        <!-- Register Section -->
+        <div class="d-flex justify-content-center align-items-center min-vh-100">
+            <div class="card p-4 shadow-lg" style="width: 350px;">
+            </br>
+                <h2 class="text-center mb-3">Sign Up</h2>
+
+                <!-- Success & Error Message -->
+                <div id="error-message" class="alert alert-danger text-center d-none mt-3"></div>
+                <div id="success-message" class="alert alert-success text-center d-none mt-3"></div>
+
+                <!-- Register Form -->
+                <form id="register-form" action="/register" method="POST">
+
+                    <div class="mb-3">
+                        <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="email" id="email" name="email" class="form-control" placeholder="Email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone Number" required>
+                    </div>
+
+                    <div class="mb-3 position-relative">
+                        <input type="password" id="newPassword" name="password" class="form-control" placeholder="Password" required>
+                        <i class="bi bi-eye-slash" id="toggle-password" style="position: absolute; right: 10px; top: 10px; cursor: pointer;"></i>
+                    </div>
+
+                    <div class="mb-3 position-relative">
+                        <input type="password" id="confirmPassword" name="confirm_password" class="form-control" placeholder=" Confirm Password" required>
+                        <i class="bi bi-eye-slash" id="toggle-confirm-password" style="position: absolute; right: 10px; top: 10px; cursor: pointer;"></i>
+                    </div>
+
+                    <!-- Terms and Condition Checkbox: -->
+                    <div class="text-center mb-3">
+                        <small>
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms">I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a></label>                        </small>
+                    </div>
+                    
+                    <button type="submit" id="register-btn" class="btn w-100 text-white">Sign Up</button>
+                </form>
+
+                <!-- Login & Home Links -->
+                <div class="text-center mt-3">
+                  <small>Already have an account? <a href="/login" class="text-decoration-none">Login</a></small></br> 
+                  <small><a href="/" class="text-decoration-none">Back to Home</a></small>
+              </div>
+            </br>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer p-3 border-top">
+        <div class="ft-container text-center">
+            <p>&copy; 2025 Travel Itinerary Planner from Team 86. All Rights Reserved</p>
+            <div class="d-flex justify-content-center">
+                <a href="/" class="me-3 text-white"><i class="bi bi-facebook"></i></a>
+                <a href="/" class="me-3 text-white"><i class="bi bi-instagram"></i></a>
+                <a href="/" class="me-3 text-white"><i class="bi bi-twitter-x"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("register-form"),
+                errorMsg = document.getElementById("error-message"),
+                successMsg = document.getElementById("success-message"),
+                images = ["/images/p1.jpg", "/images/p2.jpg", "/images/p3.jpg"],
+                fields = ["username", "email", "phone", "newPassword", "confirmPassword"],
+                regex = {
+                    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    phone: /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/,
+                    password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+                };
+
+            let index = 0;
+            setInterval(() => document.querySelector(".wrapper").setAttribute("style", `background-image: url('${images[index++ % images.length]}')`), 10000);
+
+            function showMessage(msg, type) {
+                const el = type === "error" ? errorMsg : successMsg;
+                el.innerHTML = msg;
+                el.classList.remove("d-none");
+            }
+
+            function validate() {
+                const values = Object.fromEntries(fields.map(id => [id, document.getElementById(id).value]));
+                if (values.username.length < 3) return showMessage("Username must be at least 3 characters!", "error");
+                if (!regex.email.test(values.email)) return showMessage("Invalid email format!", "error");
+                if (!regex.phone.test(values.phone)) return showMessage("Invalid phone number format!", "error");
+                if (!regex.password.test(values.newPassword)) return showMessage("Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character!", "error");
+                if (values.newPassword !== values.confirmPassword) return showMessage("Passwords do not match!", "error");
+
+                errorMsg.classList.add("d-none");
+                showMessage("Registration successful! Redirecting...", "success");
+                setTimeout(() => window.location.href = "/redirecting", 30000);
+                return true;
+            }
+
+            form.addEventListener("submit", e => validate() || e.preventDefault());
+
+            document.getElementById("toggle-password").addEventListener("click", () => {
+                const pwd = document.getElementById("newPassword");
+                const icon = document.getElementById("toggle-password");
+                pwd.type = pwd.type === "password" ? "text" : "password";
+                icon.classList.toggle("bi-eye");
+                icon.classList.toggle("bi-eye-slash");
+            });
+
+            document.getElementById("toggle-confirm-password").addEventListener("click", () => {
+                const pwd = document.getElementById("confirmPassword");
+                const icon = document.getElementById("toggle-confirm-password");
+                pwd.type = pwd.type === "password" ? "text" : "password";
+                icon.classList.toggle("bi-eye");
+                icon.classList.toggle("bi-eye-slash");
+            });
+        });
+    </script>
+
+    <!-- Modal for Terms and Conditions -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5>1. Introduction</h5>
+                    <p>Welcome to <strong>Smart Travel Itinerary Planner</strong>! By using our services and website, you agree to these Terms and Conditions. These terms apply to all users accessing or using the platform, including visitors and registered members. If you do not agree to these terms, you must refrain from using our services.</p>
+                
+                    <h5>2. Account Registration and Security</h5>
+                    <p>To use certain features of our platform, you must create an account. You agree to provide accurate, up-to-date, and complete information during registration. It is your responsibility to maintain the confidentiality of your account credentials (username and password). You must notify us immediately if you suspect unauthorized access to your account.</p>
+                
+                    <h5>3. Use of Service</h5>
+                    <p>Our service allows you to plan and organize travel itineraries, including:</p>
+                    <ul>
+                        <li>Adding destinations and activities.</li>
+                        <li>Scheduling transportation and accommodations.</li>
+                        <li>Sharing itineraries with others.</li>
+                        <li>Customizing travel plans.</li>
+                    </ul>
+                    <p>You agree to use the service solely for lawful purposes and not to engage in any activity that could harm the platform, its users, or its content.</p>
+                
+                    <h5>4. Content Submission</h5>
+                    <p>By submitting or uploading any content, such as travel destinations, photos, or itineraries, you grant <strong>Smart Travel Itinerary Planner</strong> a worldwide, royalty-free license to use, modify, and display the content within the platform. You confirm that you hold the necessary rights to the content you submit and that it does not infringe on third-party rights.</p>
+                
+                    <h5>5. Privacy and Data Protection</h5>
+                    <p>We value your privacy and are committed to protecting your personal information. Our <a href="/privacy-policy">Privacy Policy</a> outlines how we collect, use, and safeguard your data. By using our service, you consent to our data practices as described in the privacy policy.</p>
+                
+                    <h5>6. Payment and Fees</h5>
+                    <p>Certain premium features of <strong>Smart Travel Itinerary Planner</strong> may require payment. All fees for paid features are clearly displayed in the app, and you agree to pay all applicable fees associated with your use of those features. Payments will be processed via secure third-party payment processors.</p>
+                
+                    <h5>7. User Conduct</h5>
+                    <p>As a user of the platform, you agree not to engage in:</p>
+                    <ul>
+                        <li>Spamming, phishing, or any unlawful activities.</li>
+                        <li>Uploading harmful or offensive content.</li>
+                        <li>Violating the intellectual property rights of others.</li>
+                        <li>Disrupting or damaging the platform or services provided.</li>
+                    </ul>
+                    <p>Failure to comply with these guidelines may result in account suspension or termination.</p>
+                
+                    <h5>8. Modifications and Updates</h5>
+                    <p>We reserve the right to modify, suspend, or discontinue any aspect of the service at any time, including features, pricing, and terms. We will notify users of significant changes, and your continued use of the platform after such modifications constitutes your acceptance of the new terms.</p>
+                
+                    <h5>9. Third-Party Links and Services</h5>
+                    <p>Our platform may contain links to third-party websites or services. We are not responsible for the content, products, or services provided by these third parties. You agree to use these external resources at your own risk.</p>
+                
+                    <h5>10. Disclaimers</h5>
+                    <p><strong>Smart Travel Itinerary Planner</strong> is provided "as is," with no warranties or representations. We do not guarantee the accuracy, reliability, or availability of the service. We are not liable for any damages arising from your use of the platform, including loss of data or profits.</p>
+                
+                    <h5>11. Limitation of Liability</h5>
+                    <p>To the maximum extent permitted by law, <strong>Smart Travel Itinerary Planner</strong> and its affiliates are not responsible for any direct, indirect, incidental, special, or consequential damages that may arise from using or being unable to use the platform.</p>
+                
+                    <h5>12. Termination of Account</h5>
+                    <p>We reserve the right to suspend or terminate your account at our discretion if you violate any of these Terms and Conditions. You can also request to deactivate your account at any time by contacting our support team.</p>
+                
+                    <h5>13. Governing Law</h5>
+                    <p>These Terms and Conditions shall be governed by and construed in accordance with the laws of [your country or jurisdiction]. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts located in [your jurisdiction].</p>
+                
+                    <h5>14. Indemnification</h5>
+                    <p>You agree to indemnify and hold <strong>Smart Travel Itinerary Planner</strong> harmless from any claims, damages, or losses arising from your use of the platform or your violation of these Terms and Conditions.</p>
+                
+                    <h5>15. Modification of Terms</h5>
+                    <p>We may update these Terms and Conditions from time to time. Any changes will be posted on this page, and the "Last Updated" date will be revised. Please review these terms periodically to stay informed of any changes.</p>
+                
+                    <h5>16. Contact Information</h5>
+                    <p>If you have any questions or concerns about these Terms and Conditions, please contact us at:</p>
+                    <p><strong>Travel Itinerary Planner from Team 86</strong><br>
+                       Email: <a href="mailto:travel_itinerary_planner_86@gmail.com">travel_itinerary_planner_86@gmail.com</a><br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>     
+</body>
+</html>
